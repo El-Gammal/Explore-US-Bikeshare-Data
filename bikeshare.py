@@ -22,7 +22,6 @@ def print_processing_time(start_time):
 
 def get_filter_city():
 
-    # build and display the list of cities for which we have datasets
     cities_list = []
     num_cities = 0
 
@@ -31,17 +30,15 @@ def get_filter_city():
         num_cities += 1
         print('        {0:20}. {1}'.format(num_cities, city.title()))
 
-    # ask user to input a number for a city from the list; easier for user than string input
     while True:
         try:
-            city_num = int(input("\n    Enter a number for the city (1 - {}):  ".format(len(cities_list))))
+            city_num = int(input("\n    enter number for the city (1 - {}):  ".format(len(cities_list))))
         except:
             continue
 
         if city_num in range(1, len(cities_list) + 1):
             break
 
-    # get the city's name in string format from the list
     city = cities_list[city_num - 1]
     return city
 
@@ -94,15 +91,11 @@ def get_filters():
 
     print_line('=')
     print('\n  Hello! Let\'s explore some US bikeshare data!\n')
-    # get user input for city (chicago, new york city, washington).
-    #  HINT: Use a while loop to handle invalid inputs
 
     city = get_filter_city()
 
-    # get user input for month (all, january, february, ... , june)
     month = get_filter_month()
 
-    # get user input for day of week (all, monday, tuesday, ... sunday)
     day = get_filter_day()
 
     return city, month, day
@@ -130,13 +123,10 @@ def load_data(city, month, day):
 
     start_time = time.time()
 
-    # load data file into a dataframe
     df = pd.read_csv(citydata[city])
 
-    # convert the Start Time column to datetime
     df['Start Time'] = pd.to_datetime(df['Start Time'], errors='coerce')
 
-    # extract month, day of week and hour from Start Time to create new columns
     df['month'] = df['Start Time'].dt.month  # range (1-12)
     df['day_of_week'] = df['Start Time'].dt.dayofweek  # range (0-6)
     df['hour'] = df['Start Time'].dt.hour  # range (0-23)
@@ -144,20 +134,15 @@ def load_data(city, month, day):
     init_total_rides = len(df)
     filtered_rides = init_total_rides  # initially
 
-    # filter by month if applicable
     if month != 'all':
-        # use the index of the months list to get the corresponding int
         month_i = months.index(month) + 1  # index() returns 0-based, so +1
 
-        # filter by month to create the new dataframe
         df = df[df.month == month_i]
         month = month.title()
 
-    # filter by day of week if applicable
     if day != 'all':
         day_i = weekdays.index(day)  # index() returns 0-based, matches df
 
-        # filter by day of week to create the new dataframe
         df = df[df.day_of_week == day_i]
         day = day.title()
 
@@ -187,16 +172,13 @@ def time_stats(df):
     print('  Most Frequent Times of Travel...')
     start_time = time.time()
 
-    # display the most common month; convert to string
     month = months[df['month'].mode()[0] - 1].title()
     print('    Month:               ', month)
 
-    # display the most common day of week
     common_day = df['day_of_week'].mode()[0]  # day in df is 0-based
     common_day = weekdays[common_day].title()
     print('    Day of the week:     ', common_day)
 
-    # display the most common start hour; convert to 12-hour string
     hour = hour_12_str(df['hour'].mode()[0])
     print('    Start hour:          ', hour)
 
@@ -210,22 +192,18 @@ def station_stats(df):
 
     filtered_rides = len(df)
 
-    # display most commonly used start station
     start_station = df['Start Station'].mode()[0]
     start_station_trips = df['Start Station'].value_counts()[start_station]
 
     print('    Start station:       ', start_station)
     print('{0:30}{1}/{2} trips'.format(' ', start_station_trips, filtered_rides))
 
-    # display most commonly used end station
     end_station = df['End Station'].mode()[0]
     end_station_trips = df['End Station'].value_counts()[end_station]
 
     print('    End station:         ', end_station)
     print('{0:30}{1}/{2} trips'.format(' ', end_station_trips, filtered_rides))
 
-    # display most frequent combination of start station and end station trip
-    # group the results by start station and end station
     df_start_end_combination_gd = df.groupby(['Start Station', 'End Station'])
     most_freq_trip_count = df_start_end_combination_gd['Trip Duration'].count().max()
     most_freq_trip = df_start_end_combination_gd['Trip Duration'].count().idxmax()
@@ -254,7 +232,6 @@ def seconds_to_HMS_str(total_seconds):
     if minutes > 0:
         day_hour_str += '{} minutes, '.format(minutes)
 
-    # always show the seconds, even 0 secs when total > 1 minute
     if total_seconds > 59:
         day_hour_str += '{} seconds'.format(seconds)
 
@@ -262,17 +239,14 @@ def seconds_to_HMS_str(total_seconds):
 
 
 def trip_duration_stats(df):
-    """Displays statistics on the total and average trip duration."""
 
     print('  Trip Duration...')
     start_time = time.time()
 
-    # display total travel time; cast to int, we don't need fractions of seconds!
     total_travel_time = int(df['Trip Duration'].sum())
     print('    Total travel time:   ', total_travel_time, 'seconds')
     print('                             ', seconds_to_HMS_str(total_travel_time))
 
-    # display mean travel time
     mean_travel_time = int(df['Trip Duration'].mean())
     print('    Mean travel time:    ', mean_travel_time, 'seconds')
     print('                             ', seconds_to_HMS_str(mean_travel_time))
@@ -281,23 +255,18 @@ def trip_duration_stats(df):
 
 
 def user_stats(df):
-    """Displays statistics on bikeshare users."""
 
     print('  User Stats...')
     start_time = time.time()
 
-    # Display counts of user types
     user_types = df['User Type'].value_counts()
     for idx in range(len(user_types)):
         val = user_types[idx]
         user_type = user_types.index[idx]
         print('    {0:21}'.format((user_type + ':')), val)
 
-    # 'Gender' and 'Birth Year' is only available for Chicago and New York City
-    # Check for these columns before attempting to access them
 
     if 'Gender' in df.columns:
-        # Display counts of gender
         genders = df['Gender'].value_counts()
         for idx in range(len(genders)):
             val = genders[idx]
@@ -305,11 +274,10 @@ def user_stats(df):
             print('    {0:21}'.format((gender + ':')), val)
 
     if 'Birth Year' in df.columns:
-        # Display earliest, most recent, and most common year of birth
-        print('    Year of Birth...')
-        print('        Earliest:        ', int(df['Birth Year'].min()))
-        print('        Most recent:     ', int(df['Birth Year'].max()))
-        print('        Most common:     ', int(df['Birth Year'].mode()))
+        print('    year of birth...')
+        print('        earliest:        ', int(df['Birth Year'].min()))
+        print('        most recent:     ', int(df['Birth Year'].max()))
+        print('        nost common:     ', int(df['Birth Year'].mode()))
 
     print_processing_time(start_time)
 
